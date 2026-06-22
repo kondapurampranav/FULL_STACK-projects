@@ -1,8 +1,68 @@
 const db = require("../config/db")
 
-exports.getAllUsers = async (req, res) => {
+exports.getUserById = async (req, res) => {
+    const id = Number(req.params.id)
+
+    if (isNaN(id) || id < 1) {
+        return res.status(400).json({error: "Invalid user id"})
+    }
+    
     try{
-        const [rows] = await db.execute("SELECT * FROM users")
+        const [rows] = await db.execute("SELECT * FROM users WHERE id = ?", [id])
+
+        if(rows.length === 0){
+            return res.status(404).json({message: "User not found"})
+        }
+        res.json(rows)
+    }
+    catch(err){
+        res.status(500).json({error: err.message})
+    }
+}
+
+exports.getAllUsers = async (req, res) => {
+    const {search, field, sort, order, page, limit} = req.query
+
+    let query = "SELECT * FROM users"
+    let values = [];
+
+    // search and field
+    if(search && ["name", "email", "role"].includes(field)){
+        query += ` WHERE ${field} LIKE ?`
+        values.push(`%${search}%`)
+    }
+    else if(search){
+        return res.status(400).json({error: "Invalid search field"})
+    }
+
+    // sort and order
+    const sortorder = order ? order.toUpperCase() : "ASC"
+    if(order && !["ASC", "DESC"].includes(sortorder)){
+        return res.status(400).json({error: "Invalid order key"})
+    }
+
+    if(sort && ["id", "name", "email", "role"].includes(sort)){
+        query += ` ORDER BY ${sort} ${sortorder}`
+    }
+
+    // page and limit
+    if(page || limit){
+        const pageNum = page ? Number(page) : 1
+        const limitNum = limit ? Number(limit) : 10
+        if (isNaN(pageNum) || isNaN(limitNum) || pageNum < 1 || limitNum < 1) {
+            return res.status(400).json({error: "Invalid page or limit"})
+        }
+
+        if (limitNum > 100) {
+            return res.status(400).json({error: "Limit cannot exceed 100"})
+        }
+
+        const offset = (pageNum - 1) * limitNum
+        query += ` LIMIT ${limitNum} OFFSET ${offset}`
+    }
+
+    try{
+        const [rows] = await db.execute(query, values)
         res.status(200).json(rows)
     }
     catch(error){
