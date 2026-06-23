@@ -22,9 +22,10 @@ exports.getUserById = async (req, res) => {
 
 exports.getAllUsers = async (req, res) => {
     const {search, field, sort, order, page, limit} = req.query
+    const account_id = req.user.id
 
-    let query = "SELECT * FROM users"
-    let values = [];
+    let query = "SELECT * FROM users WHERE account_id = ?"
+    let values = [account_id];
 
     // search and field
     if(search && ["name", "email", "role"].includes(field)){
@@ -72,9 +73,11 @@ exports.getAllUsers = async (req, res) => {
 
 exports.addUser = async (req, res) => {
     const { name, email, role } = req.cleanedData
+    const account_id = req.user.id
 
     try{
-        const [rows] = await db.execute("INSERT INTO users (name, email, role) VALUES (?, ?, ?)",[name, email, role])
+        const [rows] = await db.execute("INSERT INTO users (name, email, role, account_id) VALUES (?, ?, ?, ?)",
+            [name, email, role, account_id])
         res.status(201).json({message: "Enrollment Successfull"})
     }
     catch(err){
