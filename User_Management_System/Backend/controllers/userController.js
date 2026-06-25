@@ -1,4 +1,5 @@
 const db = require("../config/db")
+const authMiddleware = require("../middleware/authMiddleware")
 
 exports.getUserById = async (req, res) => {
     const id = Number(req.params.id)
@@ -29,7 +30,7 @@ exports.getAllUsers = async (req, res) => {
 
     // search and field
     if(search && ["name", "email", "role"].includes(field)){
-        query += ` WHERE ${field} LIKE ?`
+        query += ` AND ${field} LIKE ?`
         values.push(`%${search}%`)
     }
     else if(search){
@@ -90,10 +91,11 @@ exports.addUser = async (req, res) => {
 
 exports.updateUser = async (req, res) => {
     const {id, name, email, role } = req.cleanedData
+    const account_id = req.user.id
 
     try{
-        const [rows] = await db.execute("UPDATE users SET name = ?, email = ?, role = ? WHERE id = ?",
-            [name, email, role, id])
+        const [rows] = await db.execute("UPDATE users SET name = ?, email = ?, role = ? WHERE id = ? AND account_id = ?",
+            [name, email, role, id, account_id])
         
         if(rows.affectedRows === 0){
             return res.status(404).json({message: "User not found"})
@@ -113,8 +115,10 @@ exports.updateUser = async (req, res) => {
 
 exports.deleteUser = async (req, res) => {
     const {id} = req.params
+    const account_id = req.user.id
+
     try{
-        const [rows] = await db.execute("DELETE FROM users WHERE id = ?", [id])
+        const [rows] = await db.execute("DELETE FROM users WHERE id = ? AND account_id = ?", [id, account_id])
         if(rows.affectedRows === 0){
             return res.status(404).json({message: "User not found"})
         }

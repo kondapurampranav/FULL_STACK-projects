@@ -45,45 +45,46 @@ exports.register = async (req, res) => {
 exports.login = async (req, res) => {
     const {email, password} = req.body
 
-    // validate
-    if(!email || !password || !email.trim() || !password.trim()){
-        return res.status(400).json({message: "Email and password are required"})
+    if(!email || !email.trim() || !password || !password.trim()){
+        return res.status(400).json({error: "Email and password are required"})
     }
 
     if(!validator.isEmail(email)){
-        return res.status(400).json({message: "Invalid email format"})
+        return res.status(400).json({error: "Invalid email format"})
     }
-
+    
     try{
-    const [isUser] = await db.execute("SELECT * FROM accounts WHERE email = ?", [email])
+        const [isUser] = await db.execute("SELECT * FROM accounts WHERE email = ?", [email])
 
-    if(isUser.length === 0){
-        return res.status(404).json({message: "User not found"})
-    }
+        if(isUser.length === 0){
+            return res.status(404).json({error: "User not found"})
+        }
 
+        const userPassword = isUser[0].password
 
-    const hashedPassword = isUser[0].password
+        const verify = await bcrypt.compare(password, userPassword)
+        if(!verify){
+            return res.status(409).json({error: "Wrong password"})
+        }
 
-    const isMatch = await bcrypt.compare(password, hashedPassword)
-
-    if(!isMatch){
-        return res.status(400).json({message: "Incorrect password"})
-    }
-
-    const token = jwt.sign(
-        {
-            id: isUser[0].id
-        },
-        process.env.JWT_SECRET
-    )
-    res.status(200).json({
-        message: "Login successful",
-        token
-    })
-    }
-    catch(err){
+        const token = jwt.sign(
+            {
+                id: isUser[0].id
+            },
+            process.env.JWT_SECRET,
+            {
+                expiresIn: "1m"
+            }
+        )
+        res.status(200).json({
+            message: "Login Successful",
+            token: token
+        })
+    }catch(err){
         res.status(500).json({error: err.message})
     }
+
+
 }
 
 

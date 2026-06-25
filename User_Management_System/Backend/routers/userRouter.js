@@ -9,14 +9,16 @@ const {getAllUsers,
 } = require("../controllers/userController")
 const {validateUser, validateupdateUser, validatedeleteUser} = require("../middleware/userValidation")
 
-router.get("/users", getAllUsers)
+const {authMiddleware} = require("../middleware/authMiddleware")
 
-router.get("/user/:id", getUserById)
+router.get("/users",authMiddleware, getAllUsers)
 
-router.post("/adduser", validateUser, addUser)
+router.get("/user/:id",authMiddleware, getUserById)
 
-router.put("/updateUser/:id", validateupdateUser, updateUser)
+router.post("/adduser",authMiddleware, validateUser, addUser)
 
-router.delete("/deleteUser/:id", validatedeleteUser, deleteUser)
+router.put("/updateUser/:id",authMiddleware, validateupdateUser, updateUser)
+
+router.delete("/deleteUser/:id",authMiddleware, validatedeleteUser, deleteUser)
 
 module.exports = router
