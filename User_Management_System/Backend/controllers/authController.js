@@ -5,7 +5,7 @@ const db = require("../config/db")
 const jwt = require("jsonwebtoken")
 
 exports.register = async (req, res) => {
-    const {email, password} = req.body
+    const {email, password, role} = req.body
 
     // validate
     if(!email || !password || !email.trim() || !password.trim()){
@@ -69,11 +69,12 @@ exports.login = async (req, res) => {
 
         const token = jwt.sign(
             {
-                id: isUser[0].id
+                id: isUser[0].id,
+                role: isUser[0].role
             },
             process.env.JWT_SECRET,
             {
-                expiresIn: "1m"
+                expiresIn: "1h"
             }
         )
         res.status(200).json({
@@ -83,8 +84,6 @@ exports.login = async (req, res) => {
     }catch(err){
         res.status(500).json({error: err.message})
     }
-
-
 }
 
 

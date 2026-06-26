@@ -21,3 +21,13 @@ exports.authMiddleware = (req, res, next) => {
     
 
 }
+
+exports.adminMiddleware = (req, res, next) => {
+    const {role} = req.user
+
+    if(role !== "admin"){
+        return res.status(403).json({error: "Forbidden"})
+    }
+
+    next()
+}

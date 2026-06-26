@@ -129,3 +129,77 @@ exports.deleteUser = async (req, res) => {
         res.status(500).json({error: err.message})
     }
 }
+
+// admin = routes only
+
+exports.getAllAccounts = async (req, res) => {
+    try{
+        const [rows] = await db.execute("SELECT * FROM users")
+
+        res.status(200).json(rows)
+    }catch(err){
+        res.status(500).json({error: err.message})
+    }
+}
+
+exports.promoteAccounts = async (req, res) => {
+    const self_id = Number(req.user.id)
+    const user_id = Number(req.params.id
+)
+    if(isNaN(user_id)){
+        return res.status(400).json({error: "Id must be a number"})
+    }
+
+    if(user_id === self_id){
+        return res.status(400).json({error: "U are already an admin"})
+    }
+
+    try{
+        const [rows] = await db.execute("SELECT * FROM ACCOUNTS WHERE id = ?", [user_id])
+
+        if(rows.length === 0){
+            return res.status(404).json({error: "User not found"})
+        }
+
+        if(rows[0].role === "admin"){
+            return res.status(409).json({error: "User is already admin"})
+        }
+
+        await db.execute("UPDATE accounts SET role = 'admin' WHERE id = ?", [user_id])
+
+        res.status(200).json({message: "User promotion successfull"})
+    } catch(err){
+        res.status(500).json({error: err.message})
+    }
+}
+
+exports.demoteAccounts = async (req, res) => {
+    const self_id = Number(req.user.id)
+    const user_id = Number(req.params.id)
+
+    if(isNaN(user_id)){
+        return res.status(400).json({error: "Id must be a number"})
+    }
+
+    if(user_id === self_id){
+        return res.status(400).json({error: "U cant demote yourself"})
+    }
+
+    try{
+        const [rows] = await db.execute("SELECT * FROM ACCOUNTS WHERE id = ?", [user_id])
+
+        if(rows.length === 0){
+            return res.status(404).json({error: "User not found"})
+        }
+
+        if(rows[0].role === "user"){
+            return res.status(409).json({error: "Already a user"})
+        }
+
+        await db.execute("UPDATE accounts SET role = 'user' WHERE id = ?", [user_id])
+
+        res.status(200).json({message: "User demotion successfull"})
+    } catch(err){
+        res.status(500).json({error: err.message})
+    }
+}

@@ -5,11 +5,14 @@ const {getAllUsers,
     getUserById,
     addUser,
     updateUser,
-    deleteUser
+    deleteUser,
+    getAllAccounts,
+    promoteAccounts,
+    demoteAccounts
 } = require("../controllers/userController")
 const {validateUser, validateupdateUser, validatedeleteUser} = require("../middleware/userValidation")
 
-const {authMiddleware} = require("../middleware/authMiddleware")
+const {authMiddleware, adminMiddleware} = require("../middleware/authMiddleware")
 
 router.get("/users",authMiddleware, getAllUsers)
 
@@ -20,5 +23,13 @@ router.post("/adduser",authMiddleware, validateUser, addUser)
 router.put("/updateUser/:id",authMiddleware, validateupdateUser, updateUser)
 
 router.delete("/deleteUser/:id",authMiddleware, validatedeleteUser, deleteUser)
+
+// admin - only routes
+
+router.get("/admin/users", authMiddleware, adminMiddleware, getAllAccounts)
+
+router.patch("/admin/promote/:id", authMiddleware, adminMiddleware, promoteAccounts)
+
+router.patch("/admin/demote/:id", authMiddleware, adminMiddleware, demoteAccounts)
 
 module.exports = router
