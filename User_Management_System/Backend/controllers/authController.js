@@ -7,6 +7,8 @@ const jwt = require("jsonwebtoken")
 exports.register = async (req, res) => {
     const {email, password, role} = req.body
 
+    console.log(req.body)
+
     // validate
     if(!email || !password || !email.trim() || !password.trim()){
         return res.status(400).json({message: "Email and password are required"})
@@ -45,6 +47,7 @@ exports.register = async (req, res) => {
 exports.login = async (req, res) => {
     const {email, password} = req.body
 
+    console.log(req.body)
     if(!email || !email.trim() || !password || !password.trim()){
         return res.status(400).json({error: "Email and password are required"})
     }

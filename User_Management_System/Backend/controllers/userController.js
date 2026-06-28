@@ -75,7 +75,7 @@ exports.getAllUsers = async (req, res) => {
 exports.addUser = async (req, res) => {
     const { name, email, role } = req.cleanedData
     const account_id = req.user.id
-
+    console.log(req)
     try{
         const [rows] = await db.execute("INSERT INTO users (name, email, role, account_id) VALUES (?, ?, ?, ?)",
             [name, email, role, account_id])
@@ -133,8 +133,54 @@ exports.deleteUser = async (req, res) => {
 // admin = routes only
 
 exports.getAllAccounts = async (req, res) => {
+    const {search, field, sort, order, page, limit} = req.query
+
+    const fields = ["name", "email", "role"]
+
     try{
-        const [rows] = await db.execute("SELECT * FROM users")
+        let query = "SELECT * FROM users"
+        let values = []
+        
+        // search
+        if(search && fields.includes(field)){
+            query += ` WHERE ${field} LIKE ?`
+            values.push(`%${search}%`)
+        }
+        else if(search){
+            return res.status(400).json({error: "Invalid search field"})
+        }
+
+        // sort
+        const orders = ["ASC", "DESC"]
+        const sortFields = ["name", "email", "role"]
+        const sortOrder = order ? order.toUpperCase() : "ASC"
+        if(order && !orders.includes(sortOrder)){
+            return res.json({error: "Invalid order"})
+        }
+
+        if(sort && sortFields.includes(sort)){
+            query += ` ORDER BY ${sort} ${sortOrder}`
+        }
+        else if(sort && !sortFields.includes(sort)){
+            return res.status(400).json({error: "Invalid field"})
+        }
+
+        // paginaton
+        const numPage = page ? Number(page) : 1
+        const numLimit = limit ? Number(limit) : 10
+
+        if(isNaN(numLimit) || isNaN(numPage)){
+            return res.json()
+        }
+        const offset = (numPage - 1) * numLimit
+
+        if(page && limit){
+
+        }
+
+        console.log(query, search, field)
+
+        const [rows] = await db.execute(query, values)
 
         res.status(200).json(rows)
     }catch(err){

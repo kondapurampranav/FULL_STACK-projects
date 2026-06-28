@@ -26,7 +26,7 @@ router.delete("/deleteUser/:id",authMiddleware, validatedeleteUser, deleteUser)
 
 // admin - only routes
 
-router.get("/admin/users", authMiddleware, adminMiddleware, getAllAccounts)
+router.get("/admin/users", getAllAccounts)
 
 router.patch("/admin/promote/:id", authMiddleware, adminMiddleware, promoteAccounts)
 
