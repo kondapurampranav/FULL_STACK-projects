@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dashboard — UserBase</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- ================================================
+       HEADER
+  ================================================= -->
+  <div class="dashboard">
+
+    <header class="header">
+      <div class="header-left">
+        <div class="header-logo-icon">U</div>
+        <span class="header-title">UserBase</span>
+        <div class="header-divider"></div>
+        <span class="header-section-label">User Management</span>
+      </div>
+      <div class="header-right">
+        <div class="header-user">
+          <!-- JS: replace initials and name with logged-in user data -->
+          <div class="header-avatar" id="header-avatar">JD</div>
+          <span class="header-username" id="header-username">Jane Doe</span>
+        </div>
+        <!-- JS: attach logout logic here -->
+        <a href="login.html" class="btn btn-ghost btn-sm" id="logout-btn">Log out</a>
+      </div>
+    </header>
+
+    <!-- ================================================
+         MAIN CONTENT
+    ================================================= -->
+    <main class="main">
+
+      <h1 class="page-heading">Users</h1>
+      <p class="page-subheading">Add, search, sort, and manage all users in the system.</p>
+
+      <!-- ── ADD USER CARD ─────────────────────────── -->
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">Add User</span>
+        </div>
+        <div class="card-body">
+          <!--
+            JS hooks:
+              id="add-user-form"   → attach submit handler
+              name attributes      → read field values
+          -->
+          <form class="add-user-form" id="add-user-form" action="#" method="POST">
+
+            <div class="form-group">
+              <label for="new-name">Name</label>
+              <input
+                type="text"
+                id="new-name"
+                name="name"
+                placeholder="Full name"
+                required
+              />
+            </div>
+
+            <div class="form-group">
+              <label for="new-email">Email</label>
+              <input
+                type="email"
+                id="new-email"
+                name="email"
+                placeholder="user@example.com"
+                required
+              />
+            </div>
+
+            <div class="form-group">
+              <label for="new-role">Role</label>
+              <input
+                type="role"
+                id="new-role"
+                name="role"
+                placeholder="Role"
+                required
+              />
+            </div>
+
+            <div class="form-group">
+              <label>&nbsp;</label><!-- spacer to align button with inputs -->
+              <button id="addUser-button" class="btn btn-primary">Add User</button>
+            </div>
+
+          </form>
+        </div>
+      </div>
+
+      <!-- ── USER TABLE CARD ───────────────────────── -->
+      <div class="card">
+
+        <!-- Toolbar -->
+        <div class="card-body" style="padding-bottom: 14px; border-bottom: 1px solid var(--gray-100);">
+          <div class="toolbar">
+            <!--
+              JS hook: id="search-input" → listen for input event,
+              filter #user-list rows
+            -->
+            <input
+              type="search"
+              id="search-input"
+              class="toolbar-search"
+              placeholder="Search by name or email…"
+            />
+
+            <span class="toolbar-label">Sort by</span>
+            <!--
+              JS hook: id="sort-select" → listen for change event,
+              re-render or re-fetch sorted users
+            -->
+            <select id="sort-select" class="toolbar-select">
+              <option value="id-asc">ID (asc)</option>
+              <option value="id-desc">ID (desc)</option>
+              <option value="name-asc">Name (A–Z)</option>
+              <option value="name-desc">Name (Z–A)</option>
+              <option value="created-desc">Newest first</option>
+              <option value="created-asc">Oldest first</option>
+            </select>
+
+            <span class="toolbar-label">Per page</span>
+            <!--
+              JS hook: id="per-page-select" → listen for change event,
+              update pagination and re-render
+            -->
+            <select id="per-page-select" class="toolbar-select">
+              <option value="5">5</option>
+              <option value="10" selected>10</option>
+              <option value="25">25</option>
+              <option value="50">50</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Table -->
+        <div class="table-wrapper">
+          <!--
+            JS hook:
+              id="user-list"        → target tbody for dynamic row injection
+              id="user-count"       → update with total user count
+              data-user-id          → on every <tr>, for row identification
+              data-action="edit"    → Edit buttons
+              data-action="delete"  → Delete buttons
+              data-action="promote" → Promote buttons (admin only)
+              data-action="demote"  → Demote buttons (admin only)
+          -->
+          <table class="user-table" id="user-table">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Role</th>
+                <th>Created</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+
+            <tbody id="user-list">
+
+              <!-- ─────────────────────────────────────
+                   SAMPLE ROWS — replace with JS render
+                   Each <tr> gets data-user-id="[id]"
+              ───────────────────────────────────────── -->
+
+              <!-- Regular user row -->
+              <tr data-user-id="1" id="name-box">
+                <!-- <td class="col-id">#001</td>
+                <td class="col-name">Jane Doe</td>
+                <td class="col-email">jane@example.com</td>
+                <td>
+                  <span class="role-badge role-admin">Admin</span>
+                </td>
+                <td>12 Jun 2025</td>
+                <td>
+                  <div class="action-group">
+                    <!-- Edit: opens #edit-modal -->
+                    <a href="#edit-modal" class="btn btn-ghost btn-sm" data-action="edit" data-user-id="1">Edit</a>
+                    <!-- Delete: opens #delete-modal -->
+                    <a href="#delete-modal" class="btn btn-danger btn-sm" data-action="delete" data-user-id="1">Delete</a>
+                    <!-- Admin-only: Demote -->
+                    <a href="#" class="btn btn-warning btn-sm" data-action="demote" data-user-id="1">Demote</a>
+                  </div>
+                </td> -->
+              </tr>
+
+              <!-- Admin user row -->
+              <tr data-user-id="2">
+                <td class="col-id">#002</td>
+                <td class="col-name">Marcus Lee</td>
+                <td class="col-email">marcus@example.com</td>
+                <td>
+                  <span class="role-badge role-user">User</span>
+                </td>
+                <td>18 Jun 2025</td>
+                <td>
+                  <div class="action-group">
+                    <a href="#edit-modal" class="btn btn-ghost btn-sm" data-action="edit" data-user-id="2">Edit</a>
+                    <a href="#delete-modal" class="btn btn-danger btn-sm" data-action="delete" data-user-id="2">Delete</a>
+                    <!-- Admin-only: Promote -->
+                    <a href="#" class="btn btn-success btn-sm" data-action="promote" data-user-id="2">Promote</a>
+                  </div>
+                </td>
+              </tr>
+
+              <tr data-user-id="3">
+                <td class="col-id">#003</td>
+                <td class="col-name">Priya Sharma</td>
+                <td class="col-email">priya@example.com</td>
+                <td>
+                  <span class="role-badge role-user">User</span>
+                </td>
+                <td>21 Jun 2025</td>
+                <td>
+                  <div class="action-group">
+                    <a href="#edit-modal" class="btn btn-ghost btn-sm" data-action="edit" data-user-id="3">Edit</a>
+                    <a href="#delete-modal" class="btn btn-danger btn-sm" data-action="delete" data-user-id="3">Delete</a>
+                    <a href="#" class="btn btn-success btn-sm" data-action="promote" data-user-id="3">Promote</a>
+                  </div>
+                </td>
+              </tr>
+
+              <tr data-user-id="4">
+                <td class="col-id">#004</td>
+                <td class="col-name">Carlos Ruiz</td>
+                <td class="col-email">carlos@example.com</td>
+                <td>
+                  <span class="role-badge role-user">User</span>
+                </td>
+                <td>24 Jun 2025</td>
+                <td>
+                  <div class="action-group">
+                    <a href="#edit-modal" class="btn btn-ghost btn-sm" data-action="edit" data-user-id="4">Edit</a>
+                    <a href="#delete-modal" class="btn btn-danger btn-sm" data-action="delete" data-user-id="4">Delete</a>
+                    <a href="#" class="btn btn-success btn-sm" data-action="promote" data-user-id="4">Promote</a>
+                  </div>
+                </td>
+              </tr>
+
+              <tr data-user-id="5">
+                <td class="col-id">#005</td>
+                <td class="col-name">Sophie Martin</td>
+                <td class="col-email">sophie@example.com</td>
+                <td>
+                  <span class="role-badge role-admin">Admin</span>
+                </td>
+                <td>25 Jun 2025</td>
+                <td>
+                  <div class="action-group">
+                    <a href="#edit-modal" class="btn btn-ghost btn-sm" data-action="edit" data-user-id="5">Edit</a>
+                    <a href="#delete-modal" class="btn btn-danger btn-sm" data-action="delete" data-user-id="5">Delete</a>
+                    <a href="#" class="btn btn-warning btn-sm" data-action="demote" data-user-id="5">Demote</a>
+                  </div>
+                </td>
+              </tr>
+
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Pagination -->
+        <!--
+          JS hook:
+            id="pagination-info"     → "Showing 1–10 of 48 users"
+            id="pagination-controls" → inject page buttons dynamically
+        -->
+        <div class="pagination">
+          <span class="pagination-info" id="pagination-info">
+            Showing 1–5 of 5 users
+          </span>
+          <div class="pagination-controls" id="pagination-controls">
+            <a href="#" class="page-btn arrow disabled" data-action="prev">← Prev</a>
+            <a href="#" class="page-btn active" data-page="1">1</a>
+            <a href="#" class="page-btn" data-page="2">2</a>
+            <a href="#" class="page-btn" data-page="3">3</a>
+            <a href="#" class="page-btn" data-page="4">4</a>
+            <a href="#" class="page-btn arrow" data-action="next">Next →</a>
+          </div>
+        </div>
+
+      </div>
+      <!-- end user table card -->
+
+    </main>
+  </div>
+  <!-- end .dashboard -->
+
+
+  <!-- ================================================
+       EDIT USER MODAL
+       Opened via href="#edit-modal" on Edit buttons.
+       Closed via href="#" on Cancel / ×.
+       JS: populate #edit-name, #edit-email with row data
+           before the modal appears, then submit form.
+  ================================================= -->
+  <div class="modal-overlay" id="edit-modal" role="dialog" aria-modal="true" aria-labelledby="edit-modal-title">
+    <div class="modal">
+
+      <div class="modal-header">
+        <span class="modal-title" id="edit-modal-title">Edit User</span>
+        <a href="#" class="modal-close" aria-label="Close">&#x2715;</a>
+      </div>
+
+      <div class="modal-body">
+        <!--
+          JS hooks:
+            id="edit-user-form"  → attach submit handler
+            id="edit-user-id"    → hidden field holding the target user id
+            id="edit-name"       → pre-populate with current name
+            id="edit-email"      → pre-populate with current email
+        -->
+        <form id="edit-user-form" action="#" method="POST">
+
+          <input type="hidden" id="edit-user-id" name="user_id" />
+
+          <div class="form-group">
+            <label for="edit-name">Name</label>
+            <input
+              type="text"
+              id="edit-name"
+              name="name"
+              placeholder="Full name"
+              required
+            />
+          </div>
+
+          <div class="form-group">
+            <label for="edit-email">Email</label>
+            <input
+              type="email"
+              id="edit-email"
+              name="email"
+              placeholder="user@example.com"
+              required
+            />
+          </div>
+
+        </form>
+      </div>
+
+      <div class="modal-footer">
+        <a href="#" class="btn btn-ghost">Cancel</a>
+        <!-- JS: trigger form submit programmatically, or move button inside form -->
+        <button type="submit" form="edit-user-form" class="btn btn-primary">Save changes</button>
+      </div>
+
+    </div>
+  </div>
+
+
+  <!-- ================================================
+       DELETE CONFIRMATION MODAL
+       Opened via href="#delete-modal" on Delete buttons.
+       Closed via href="#" on Cancel / ×.
+       JS: populate #delete-user-name before modal appears.
+           Attach click handler to #confirm-delete-btn.
+  ================================================= -->
+  <div class="modal-overlay" id="delete-modal" role="dialog" aria-modal="true" aria-labelledby="delete-modal-title">
+    <div class="modal">
+
+      <div class="modal-header">
+        <span class="modal-title" id="delete-modal-title">Delete User</span>
+        <a href="#" class="modal-close" aria-label="Close">&#x2715;</a>
+      </div>
+
+      <div class="modal-body">
+        <div class="delete-warning-icon">&#x26A0;&#xFE0F;</div>
+        <p class="delete-warning-title">Are you sure?</p>
+        <p class="delete-warning-text">
+          You are about to permanently delete
+          <!-- JS: inject user name here -->
+          <strong id="delete-user-name">this user</strong>.
+          This action cannot be undone.
+        </p>
+      </div>
+
+      <div class="modal-footer">
+        <a href="#" class="btn btn-ghost">Cancel</a>
+        <!-- JS: id="confirm-delete-btn" → attach delete API call -->
+        <button type="button" class="btn btn-confirm-delete" id="confirm-delete-btn">Delete user</button>
+      </div>
+
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+
+</body>
+</html>
