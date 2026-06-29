@@ -3,21 +3,33 @@ const authMiddleware = require("../middleware/authMiddleware")
 
 exports.getUserById = async (req, res) => {
     const id = Number(req.params.id)
+    const account_id = req.user.id
 
     if (isNaN(id) || id < 1) {
-        return res.status(400).json({error: "Invalid user id"})
+        return res.status(400).json({
+            success: false,
+            error: "Invalid user id"
+        })
     }
     
     try{
-        const [rows] = await db.execute("SELECT * FROM users WHERE id = ?", [id])
+        const [rows] = await db.execute("SELECT * FROM users WHERE id = ? AND account_id = ?", [id, account_id])
 
         if(rows.length === 0){
-            return res.status(404).json({message: "User not found"})
+            return res.status(404).json({
+                success: false,
+                message: "User not found"
+            })
         }
-        res.json(rows)
+        res.json({
+            success: true,
+            data: rows})
     }
     catch(err){
-        res.status(500).json({error: err.message})
+        res.status(500).json({
+            success: false,
+            error: err.message
+        })
     }
 }
 
@@ -34,13 +46,18 @@ exports.getAllUsers = async (req, res) => {
         values.push(`%${search}%`)
     }
     else if(search){
-        return res.status(400).json({error: "Invalid search field"})
+        return res.status(400).json({
+            success: false,
+            error: "Invalid search field"
+        })
     }
 
     // sort and order
     const sortorder = order ? order.toUpperCase() : "ASC"
     if(order && !["ASC", "DESC"].includes(sortorder)){
-        return res.status(400).json({error: "Invalid order key"})
+        return res.status(400).json({
+            success: false,
+            error: "Invalid order key"})
     }
 
     if(sort && ["id", "name", "email", "role"].includes(sort)){
@@ -52,11 +69,15 @@ exports.getAllUsers = async (req, res) => {
         const pageNum = page ? Number(page) : 1
         const limitNum = limit ? Number(limit) : 10
         if (isNaN(pageNum) || isNaN(limitNum) || pageNum < 1 || limitNum < 1) {
-            return res.status(400).json({error: "Invalid page or limit"})
+            return res.status(400).json({
+                success: false,
+                error: "Invalid page or limit"})
         }
 
         if (limitNum > 100) {
-            return res.status(400).json({error: "Limit cannot exceed 100"})
+            return res.status(400).json({
+                success: false,
+                error: "Limit cannot exceed 100"})
         }
 
         const offset = (pageNum - 1) * limitNum
@@ -65,12 +86,19 @@ exports.getAllUsers = async (req, res) => {
 
     try{
         const [rows] = await db.execute(query, values)
-        res.status(200).json(rows)
+        res.status(200).json({
+            success: true,
+            data: rows
+        })
     }
-    catch(error){
-        res.status(500).json({error: error.message})
+    catch(err){
+        res.status(500).json({
+            success: false,
+            error: err.message
+        })
     }
 }
+
 
 exports.addUser = async (req, res) => {
     const { name, email, role } = req.cleanedData
@@ -79,13 +107,28 @@ exports.addUser = async (req, res) => {
     try{
         const [rows] = await db.execute("INSERT INTO users (name, email, role, account_id) VALUES (?, ?, ?, ?)",
             [name, email, role, account_id])
-        res.status(201).json({message: "Enrollment Successfull"})
+        res.status(201).json({
+            success: true,
+            message: "User created Successfully",
+            data: {
+                id: rows.insertId,
+                name,
+                email,
+                role
+            }
+        })
     }
     catch(err){
         if(err.code === "ER_DUP_ENTRY"){
-            return res.status(409).json({message: "Email already exists"})
+            return res.status(409).json({
+                success: false,
+                error: "Email already exists",
+            })
     }
-        res.status(500).json({error: err.message})
+        res.status(500).json({
+            success: false,
+            error: err.message
+        })
     }
 }
 
@@ -98,16 +141,34 @@ exports.updateUser = async (req, res) => {
             [name, email, role, id, account_id])
         
         if(rows.affectedRows === 0){
-            return res.status(404).json({message: "User not found"})
+            return res.status(404).json({
+                success: false,
+                error: "User not found"
+            })
         }
         
-        res.status(200).json({message: "User update successfull"})
+        res.status(200).json({
+            success: true,
+            message: "User update successfull",
+            data: {
+                id: rows.insertId,
+                name,
+                email,
+                role
+            }
+        })
     }
     catch(err) {
         if(err.code === "ER_DUP_ENTRY"){
-            return res.status(409).json({message: "Email already exists"})
+            return res.status(409).json({
+                success: false,
+                error: "Email already exists"
+            })
     }
-        res.status(500).json({error: err.message})
+        res.status(500).json({
+            success: false,
+            error: error.message
+        })
     }
 }
 
@@ -123,10 +184,16 @@ exports.deleteUser = async (req, res) => {
             return res.status(404).json({message: "User not found"})
         }
 
-        res.status(200).json({message: "User deleted successfully"})
+        res.status(200).json({
+            success: true,
+            message: "User deleted successfully",
+        })
     }
     catch(err){
-        res.status(500).json({error: err.message})
+        res.status(500).json({
+            success: false,
+            error: error.message
+        })
     }
 }
 
