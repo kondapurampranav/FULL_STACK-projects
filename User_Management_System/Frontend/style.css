@@ -492,8 +492,7 @@ a:hover {
 
 .user-table {
   width: 100%;
-  border-collapse: collapse;
-  font-size: 13px;
+  table-layout: fixed;
 }
 
 .user-table thead {
@@ -523,9 +522,21 @@ a:hover {
   border-bottom: none;
 }
 
-.user-table tbody tr:hover td {
-  background: var(--gray-50);
+.user-table td:last-child,
+
+.user-table th:last-child {
+
+    white-space: nowrap;
+
+    width: 170px;
+
 }
+
+
+
+/* .user-table tbody tr:hover td {
+  background: var(--gray-50);
+} */
 
 .user-table td.col-id {
   color: var(--gray-400);
@@ -543,30 +554,13 @@ a:hover {
 }
 
 .role-badge {
-  display: inline-flex;
-  align-items: center;
-  padding: 2px 8px;
-  border-radius: 20px;
-  font-size: 11px;
-  font-weight: 600;
   text-transform: uppercase;
-  letter-spacing: .3px;
-}
-
-.role-admin {
-  background: var(--blue-light);
-  color: var(--blue);
-}
-
-.role-user {
-  background: var(--gray-100);
-  color: var(--gray-500);
 }
 
 .action-group {
-  display: flex;
-  gap: 6px;
-  flex-wrap: wrap;
+    display: flex;
+    gap: 6px;
+    flex-wrap: nowrap;
 }
 
 
