@@ -23,7 +23,8 @@ exports.getUserById = async (req, res) => {
         }
         res.json({
             success: true,
-            data: rows})
+            data: rows[0]
+        })
     }
     catch(err){
         res.status(500).json({
@@ -54,13 +55,21 @@ exports.getAllUsers = async (req, res) => {
 
     // sort and order
     const sortorder = order ? order.toUpperCase() : "ASC"
+    const allowedSort = ["id", "name", "email", "role"]
     if(order && !["ASC", "DESC"].includes(sortorder)){
         return res.status(400).json({
             success: false,
             error: "Invalid order key"})
     }
 
-    if(sort && ["id", "name", "email", "role"].includes(sort)){
+    if(sort && !allowedSort.includes(sort)){
+        return res.status(400).json({
+            success: false,
+            error: "Invalid sort field"
+    });
+    }
+
+    if(sort){
         query += ` ORDER BY ${sort} ${sortorder}`
     }
 
@@ -167,7 +176,7 @@ exports.updateUser = async (req, res) => {
     }
         res.status(500).json({
             success: false,
-            error: error.message
+            error: err.message
         })
     }
 }
